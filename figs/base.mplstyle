@@ -1,0 +1,20 @@
+# the style file I used for matplibplot pkg
+
+# Font
+mathtext.fontset: stix
+font.family: STIXGeneral
+font.size: 15
+xtick.labelsize: 18
+ytick.labelsize: 18
+legend.fontsize: 25
+axes.labelsize : 25
+
+# fig
+figure.figsize: 10.0, 5.0
+figure.dpi: 100
+figure.subplot.wspace: 0.4
+figure.subplot.hspace: 0.4
+
+# save fig
+savefig.dpi: 1000 
+savefig.bbox: tight
