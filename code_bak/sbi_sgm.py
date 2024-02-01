@@ -126,13 +126,18 @@ class SBI_SGM():
         """
         sgm_params = (self._trans_fn(sgm_reparams)*(self.params.prior_bds[:, 1]-self.params.prior_bds[:, 0]) +
                        self.params.prior_bds[:, 0])
-        psd = self.sgmmodel.run_local_coupling_forward(sgm_params)
+        #sgm_params = self._reparam_fn(sgm_reparams, self.params.prior_bds)
+        psd, spatialFs = self.sgmmodel.run_local_coupling_forward(sgm_params)
         psd = psd[:68, :]
+        
+        sp_fs= spatialFs.sum(axis=1)
+        if is_train: 
+            sp_fs = stdz_vec(sp_fs) # std it
         
         std_psd_DB = psd_2tr(psd)
         psd_fs = std_psd_DB.flatten()
         
-        res = psd_fs
+        res = np.concatenate([psd_fs, sp_fs]) 
         if is_train:
             noise =  np.random.randn(*res.shape)*self.params.noise_sd 
         else:
@@ -183,8 +188,12 @@ class SBI_SGM():
         """
         assert psd.shape[0] == 68, "Make sure the input psd is nroi x nfreq"
         # only get spatial feature from alpha band
+        freqband = np.where((self.sgmmodel.freqs>=8) & (self.sgmmodel.freqs<=12))[0]
+        raw_sps = psd[:, freqband]
+    
+        std_spv = stdz_vec(raw_sps.sum(axis=1))
         std_psd_DB = psd_2tr(psd)
-        curX_raw = std_psd_DB.flatten()
+        curX_raw = np.concatenate([std_psd_DB.flatten(), std_spv])
         self.curX = torch.Tensor(curX_raw)
         
         # if add a data, clean the previous sps
@@ -205,15 +214,15 @@ class SBI_SGM():
         self.post_sps = self._reparam_fn(post_sps_reparam, self.params.prior_bds) 
         return self.post_sps
         
-    def get_model_psd(self):
+    def get_model_psd_sp(self):
         """Get modelled PSD and spatial features based on self.post_sps
         """
         assert self.post_sps is not None, "You should get posterior sps with get_post_sps(n)"
         pt_est = np.median(self.post_sps, axis=0)
-        cur_psd = self.sgmmodel.run_local_coupling_forward(pt_est)
+        cur_psd, cur_sp = self.sgmmodel.run_local_coupling_forward(pt_est)
         cur_psd = cur_psd[:68, :]
         cur_psd_DB = psd_2tr(cur_psd)
-        return cur_psd_DB
+        return cur_psd_DB, cur_sp.sum(axis=1)
         
 
     def get_post_psd_sps(self, n=100):
@@ -233,5 +242,5 @@ class SBI_SGM():
                             num_workers=20)
         
         _, post_psd_stable = self._filter_unstable(tmp_sps, post_psd)
-        self.post_psd = post_psd_stable[:, :].reshape(-1, 68, len(self.sgmmodel.freqs)).numpy()
+        self.post_psd = post_psd_stable[:, :-68].reshape(-1, 68, len(self.sgmmodel.freqs)).numpy()
         return self.post_psd

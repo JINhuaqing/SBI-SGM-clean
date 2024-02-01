@@ -93,10 +93,16 @@ def network_transfer_local(C, D, parameters, w):
 
 
 class SGM:
-    def __init__(self, C, D, freqs):
+    def __init__(self, C, D, freqs, band="alpha"):
         self.freqs = freqs 
         self.C = C
         self.D = D
+        if band == "alpha":
+            self.freqband = np.where((freqs>=8) & (freqs<=12))[0]
+        elif band == "beta":
+            self.freqband = np.where((freqs>=13) & (freqs<=25))[0]
+        else:
+            self.freqband = np.arange(len(freqs))
             
     def run_local_coupling_forward(self, params):
         """run_forward. Function for running the forward model over the passed in range of frequencies,
@@ -135,5 +141,7 @@ class SGM:
         eigenvectors = np.asarray(eigenvectors)
         model_out = np.transpose(np.asarray(model_out))
         
-        return model_out
+        model_out_band = model_out[:68, self.freqband]
+    
+        return model_out,  model_out_band
         
