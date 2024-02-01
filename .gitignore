@@ -1,4 +1,4 @@
-data/
+data/*
 results/
 __pycache__
 .ipynb_checkpoints
@@ -6,3 +6,11 @@ sbi-logs/
 mid_results/
 tmp/
 Untit*
+code_bak/
+*.swp
+
+!data/individual_psd_reordered_matlab.nc
+!data/individual_connectomes_reordered.nc
+!data/mean80_fibercount.csv
+!data/mean80_fiberlength.csv
+!data/example_fc.pkl
