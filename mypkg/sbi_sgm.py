@@ -33,9 +33,14 @@ class SBI_SGM():
     It can be only used for DK altas (68). 
     You should use it with SGM class
     """
-    def __init__(self, sgmmodel, save_folder=None, **input_params):
+    def __init__(self, sgmmodel, save_folder=None, verbose=False, **input_params):
         
         
+        if verbose:
+            logger.handlers[0].setLevel(logging.INFO)
+        else:
+            logger.handlers[0].setLevel(logging.WARNING)
+            
         # default params
         params = edict()
         
@@ -105,7 +110,7 @@ class SBI_SGM():
         self.curX = None
         self.post_sps = None
         
-        assert not self.params.is_embed, f"The embed network is not fully test!! If using, comment out this sentence."
+        assert not self.params.is_embed, f"The embed network is not fully tested!! If using, comment out this sentence."
         if self.params.is_embed:
             self.embedding_net = SummaryNet(num_in_fs=68*41)
             self.params.den_est = sutils.posterior_nn(model=self.params.den_est, 
@@ -181,6 +186,7 @@ class SBI_SGM():
         """Add psd data to do inference
         psd: nroi x nfreq array, should in abs magnitude
         """
+        assert psd.shape[0] == 68, "Make sure the input psd is nroi x nfreq"
         # only get spatial feature from alpha band
         freqband = np.where((self.sgmmodel.freqs>=8) & (self.sgmmodel.freqs<=12))[0]
         raw_sps = psd[:, freqband]

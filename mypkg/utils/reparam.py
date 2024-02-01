@@ -39,7 +39,6 @@ def theta_raw_2out(thetas_raw, prior_bds, map_fn=logistic_np):
     """
     if thetas_raw.ndim == 1:
         thetas_raw = thetas_raw.reshape(1, -1)
-    assert prior_bds.shape[0] == 7
-    assert thetas_raw.shape[1] == 7
+    assert prior_bds.shape[0] == thetas_raw.shape[1]
     thetas_out = map_fn(thetas_raw)*(prior_bds[:, 1] -  prior_bds[:, 0]) + prior_bds[:, 0]
     return thetas_out

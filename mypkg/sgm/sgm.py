@@ -142,12 +142,6 @@ class SGM:
         model_out = np.transpose(np.asarray(model_out))
         
         model_out_band = model_out[:68, self.freqband]
-        #model_out_band_sum = np.sum(model_out_band,axis = 1)
-        #model_out_band_sum_norm = model_out_band_sum/np.linalg.norm(model_out_band_sum) # spatial feature on the specific band
     
         return model_out,  model_out_band
-        # model_out: estimated PSD, raw
-        # model_out_band: estimated PSD along selected band
-        #return model_out, model_out_band_sum_norm, model_out_band, frequency_response, eigenvalues, eigenvectors
-        
         

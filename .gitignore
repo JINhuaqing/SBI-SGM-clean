@@ -2,3 +2,7 @@ data/
 results/
 __pycache__
 .ipynb_checkpoints
+sbi-logs/
+mid_results/
+tmp/
+Untit*
