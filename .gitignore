@@ -8,6 +8,7 @@ tmp/
 Untit*
 code_bak/
 *.swp
+test_code
 
 !data/individual_psd_reordered_matlab.nc
 !data/individual_connectomes_reordered.nc

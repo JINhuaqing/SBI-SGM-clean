@@ -68,7 +68,7 @@ class sgm_fMRI():
                    perc_thresh (bool): Whether to use percentile thresholding.
                    eig_weights (bool): Whether to use eigenvalue weights.
                    deconvHRF (bool): Whether to perform HRF deconvolution.
-                   is_ann (bool): Whether to use artificial neural networks.
+                   is_ann (bool): Whether to use annealing to fit or not.
                    model_focus (str): The focus of the model (e.g., "both", "FX(psd)", "FC").
                    fitmean (bool): Whether to fit to the mean signal or not
         """
@@ -148,14 +148,20 @@ class sgm_fMRI():
             
     
     def _get_emp_psd(self):
-        f, Pxx = signal.welch(self.data, fs=self.fs, nperseg=64, axis=0);
+        nblock = 128
+        win = signal.windows.hanning(nblock, True)
+        f, Pxx = signal.welch(self.data, window=win, fs=self.fs, 
+                               nperseg=nblock, 
+                               noverlap=int(nblock/2), axis=0);
+
+        kpidx = np.bitwise_and(self.params.fband[0]<f, self.params.fband[1]>f)
+        self.fvec = f[kpidx]
+        self.omegavec = 2 * np.pi * self.fvec
         # not in dB, not squared
-        PSD = np.sqrt(np.array([obt_psd_at_freqs(Pxx[:, roi_ix], f, self.fvec) 
-                                for roi_ix in range(self.num_rois)]).T);
+        PSD = np.sqrt(Pxx[kpidx])
         
         f_at_max = self.fvec[np.argmax(PSD, axis=0)];
         self.omega = 2*np.pi*np.median(f_at_max);
-        #self.omega = 2*np.pi*f_at_max.mean();
         self.emp_psd = PSD
     
         
@@ -251,10 +257,12 @@ class sgm_fMRI():
         logger.info(fit_params)
         
         if not self.params.is_ann:
+            logger.warning(f"Compared with minimize function in scipy, Annealing provides higher optimization accuracy.")
             fit_res = minimize(self._obj_fn, 
                                x0=fit_params.theta0, 
                                bounds=fit_params.bds, 
-                               options={"maxiter":fit_params.maxiter})
+                               options={"maxiter":fit_params.maxiter, 
+                                        "disp":False})
         else:
             fit_res = dual_annealing(self._obj_fn, 
                                      x0=fit_params.theta0, 
