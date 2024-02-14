@@ -36,22 +36,23 @@ def network_transfer_local(C, D, parameters, w):
     zero_thr = 0.05
 
     # define sum of degrees for rows and columns for laplacian normalization
+    
+    C = C/np.linalg.norm(C)
+    # define sum of degrees for rows and columns for laplacian normalization
     rowdegree = np.transpose(np.sum(C, axis=1))
     coldegree = np.sum(C, axis=0)
-    qind = rowdegree + coldegree < 0.2 * np.mean(rowdegree + coldegree)
-    rowdegree[qind] = np.inf
-    coldegree[qind] = np.inf
+
+    degree = (rowdegree + coldegree)/2
+    eps = np.percentile(degree,5)
 
     nroi = C.shape[0]
-
-    K = nroi
 
     Tau = 0.001 * D / speed
     Cc = C * np.exp(-1j * Tau * w)
 
     # Eigen Decomposition of Complex Laplacian Here
     L1 = np.identity(nroi)
-    L2 = np.divide(1, np.sqrt(np.multiply(rowdegree, coldegree)) + np.spacing(1))
+    L2 = np.divide(1, np.sqrt(np.multiply(rowdegree, coldegree)) + eps)
     L = L1 - alpha * np.matmul(np.diag(L2), Cc)
 
     d, v = np.linalg.eig(L)  
@@ -60,7 +61,7 @@ def network_transfer_local(C, D, parameters, w):
     eig_val = d[eig_ind]  # re-indexing eigen values with same sorted index
 
     eigenvalues = np.transpose(eig_val)
-    eigenvectors = eig_vec[:, 0:K]
+    eigenvectors = eig_vec[:, 0:nroi]
 
 #     # Cortical model
     Fe = np.divide(1 / tau_e ** 2, (1j * w + 1 / tau_e) ** 2)
@@ -74,7 +75,6 @@ def network_transfer_local(C, D, parameters, w):
     Htotal = Hed + Hid
 
 
-#     q1 = (1j * w + 1 / tau_e * Fe * eigenvalues)
     q1 = (1j * w + 1 / tauC * FG * eigenvalues)
     qthr = zero_thr * np.abs(q1[:]).max()
     magq1 = np.maximum(np.abs(q1), qthr)
@@ -84,7 +84,7 @@ def network_transfer_local(C, D, parameters, w):
     
     model_out = 0
 
-    for k in range(K):
+    for k in range(nroi):
         model_out += (frequency_response[k]) * np.outer(eigenvectors[:, k], np.conjugate(eigenvectors[:, k])) 
     model_out2 = np.linalg.norm(model_out,axis=1)
 
