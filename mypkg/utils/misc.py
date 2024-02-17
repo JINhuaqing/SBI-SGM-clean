@@ -2,6 +2,31 @@ import numpy as np
 import scipy
 import pickle
 from easydict import EasyDict as edict
+import logging
+
+
+def _set_verbose_level(verbose, logger):
+    if verbose == 0:
+        verbose_lv = logging.ERROR
+    elif verbose == 1:
+        verbose_lv = logging.WARNING
+    elif verbose == 2:
+        verbose_lv = logging.INFO
+    elif verbose == 3:
+        verbose_lv = logging.DEBUG
+    if len(logger.handlers)>0:
+        logger.handlers[0].setLevel(verbose_lv)
+    else:
+        logger.setLevel(verbose_lv)
+
+def _update_params(input_params, def_params, logger):
+    for ky, v in input_params.items():
+        if ky not in def_params.keys():
+            logger.warning(f"Check your input, {ky} is not used.")
+        else:
+            if v is not None:
+                def_params[ky] = v
+    return edict(def_params)
 
 def mat_power(mat, pv=-1):
     """mat is a symmetric positive-semi-definite matrix
