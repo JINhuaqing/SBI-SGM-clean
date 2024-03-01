@@ -19,10 +19,11 @@ def _set_verbose_level(verbose, logger):
     else:
         logger.setLevel(verbose_lv)
 
-def _update_params(input_params, def_params, logger):
+def _update_params(input_params, def_params, logger=None):
     for ky, v in input_params.items():
         if ky not in def_params.keys():
-            logger.warning(f"Check your input, {ky} is not used.")
+            if logger is not None:
+                logger.warning(f"Check your input, {ky} is not used.")
         else:
             if v is not None:
                 def_params[ky] = v

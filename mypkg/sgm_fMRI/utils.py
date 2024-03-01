@@ -20,7 +20,7 @@ def obt_psd_at_freqs(psd_raw, f, fvec):
 
     """
     eps = 1e-10
-    psd_dB = 10*np.log10(psd_raw+eps)
+    psd_dB = 20*np.log10(psd_raw+eps)
     
     # Smooth the PSD
     lpf = np.array([1, 2, 5, 2, 1]) 
@@ -28,7 +28,7 @@ def obt_psd_at_freqs(psd_raw, f, fvec):
     psd_dB = np.convolve(psd_dB, lpf, 'same')
     
     fit_psd = interp1d(f, psd_dB)
-    return 10**(fit_psd(fvec)/10)
+    return 10**(fit_psd(fvec)/20)
 
 def minmax_fn(x, byrow=False):
     if x.ndim == 1:
