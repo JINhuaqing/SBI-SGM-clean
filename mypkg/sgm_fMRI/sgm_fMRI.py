@@ -4,7 +4,7 @@ import numpy as np
 from easydict import EasyDict as edict
 
 from utils.measures import reg_R_fn
-from .utils import minmax_fn, obt_psd_at_freqs
+from utils.standardize import minmax_fn
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -60,7 +60,7 @@ class sgm_fMRI():
     def add_data(self, data, **in_params):
         """Add observed fMRI data
            args:
-               data: num_pts x num_rois, the fMRI data
+               data: num_rois x num_pts, the fMRI data
                in_params: params for fitting 
                    TR (float): The repetition time in seconds, i.e., 1/fs
                    fband (list): The frequency band of interest, [low, high]
@@ -72,7 +72,7 @@ class sgm_fMRI():
                    model_focus (str): The focus of the model (e.g., "both", "FX(psd)", "FC").
                    fitmean (bool): Whether to fit to the mean signal or not
         """
-        self.data = data
+        self.data = data.T
         self.num_pts, _ = data.shape
         for key in in_params.keys():
             if key not in self.params.keys():

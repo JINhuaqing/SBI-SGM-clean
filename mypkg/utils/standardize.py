@@ -11,8 +11,20 @@ def stdz_psd(x):
 
 # original name is std_vec
 stdz_vec = lambda x: (x-x.mean())/x.std()
-
 minmax_vec = lambda x: (x-x.min())/(x.max()-x.min())
+
+def minmax_fn(x, byrow=False):
+    if x.ndim == 1:
+        minmax_x = (x-x.min())/(x.max()-x.min())
+    elif x.ndim == 2:
+        if not byrow:
+            x = x.T
+        minmax_x = ((x - x.min(axis=1, keepdims=1))/(x.max(axis=1, keepdims=1) - x.min(axis=1, keepdims=1)))
+        
+        if not byrow:
+            minmax_x = minmax_x.T
+    return minmax_x
+
 
 
 # convert psd to training format
