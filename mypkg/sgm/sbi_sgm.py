@@ -224,7 +224,7 @@ class SBI_SGM():
         
         psd_params_def = edict({
         "num_taps": 351,
-        "nperseg": 128, 
+        "nperseg": 1024, 
         })
         
         

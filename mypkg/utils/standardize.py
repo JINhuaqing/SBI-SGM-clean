@@ -5,7 +5,6 @@ from .misc import mag2db
 # x: Nrois x Nfreq
 # orginal name is std_psd
 def stdz_psd(x):
-    assert x.shape[-1] == 40
     res = (x- x.mean(axis=1).reshape(-1, 1))/x.std(axis=1).reshape(-1, 1)
     return res
 

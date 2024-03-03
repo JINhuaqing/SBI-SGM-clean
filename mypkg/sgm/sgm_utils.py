@@ -106,13 +106,15 @@ def obt_psd_at_freqs(psd_raw, f, fvec):
     - The PSD values at the given frequency points are obtained using linear interpolation.
 
     """
-    eps = 1e-10
+    eps = 1e-30
     psd_dB = 20*np.log10(psd_raw+eps)
     
-    # Smooth the PSD
-    lpf = np.array([1, 2, 5, 2, 1]) 
+    ### Smooth the PSD
+    lpf = np.array([1, 2, 10, 2, 1]) 
     lpf = lpf/np.sum(lpf)
-    psd_dB = np.convolve(psd_dB, lpf, 'same')
+    psd_dB_part = np.convolve(psd_dB, lpf, 'valid')
+    # consider the boundary effect
+    psd_dB = np.concatenate([psd_dB[:2], psd_dB_part, psd_dB[-2:]])
     
     fit_psd = interp1d(f, psd_dB)
     return 10**(fit_psd(fvec)/20)
@@ -135,14 +137,15 @@ def get_psd(input_signal, freqs, fs, psd_params={}):
     """
     psd_params_def = edict({
         "num_taps": 351,
-        "nperseg": 128
+        "nperseg": 1024, 
     })
     bds = [freqs[0], freqs[-1]]
+    bds1 = [freqs[0]*0.5, freqs[-1]*1.1]
     psd_params = _update_params(psd_params, psd_params_def, logger)
     
     input_signal = signal.detrend(input_signal, axis=1, type="linear", bp=0, overwrite_data=False);
     bii = signal.firwin(psd_params.num_taps, 
-                        bds,
+                        bds1,
                         pass_zero=False, 
                         fs=fs, 
                         window="hamming");
@@ -151,7 +154,9 @@ def get_psd(input_signal, freqs, fs, psd_params={}):
     input_signal = signal.filtfilt(bii, 1, input_signal, axis=1);
     
     # not in dB, not squared
-    f, Pxx = signal.welch(input_signal, fs=fs, axis=1, detrend=False)
+    f, Pxx = signal.welch(input_signal, fs=fs, axis=1, 
+                          nperseg=psd_params.nperseg, 
+                          detrend=False)
     low_idx = np.argmin(np.abs(f - bds[0]))
     if f[low_idx] > bds[0]:
         low_idx = low_idx -1
