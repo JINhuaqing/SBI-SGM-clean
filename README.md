@@ -1,4 +1,4 @@
-This repository contains the python code to implement [spectral graph model (SGM)](https://www.sciencedirect.com/science/article/pii/S1053811922000490) and fit it via [simulation-based inference](https://www.pnas.org/doi/abs/10.1073/pnas.1912789117). 
+This repository contains the python code to implement [spectral graph model (SGM)](https://www.sciencedirect.com/science/article/pii/S1053811922000490) and fit it via [simulation-based inference (SBI)](https://www.pnas.org/doi/abs/10.1073/pnas.1912789117). 
 
 
 SGM is a neuro-model which can capture the frequency power spectra (PSD) and functional connectivity (FC) obtained from MEG recordings.
