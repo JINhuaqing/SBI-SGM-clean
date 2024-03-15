@@ -107,7 +107,7 @@ def obt_psd_at_freqs(psd_raw, f, fvec):
 
     """
     eps = 1e-30
-    psd_dB = 20*np.log10(psd_raw+eps)
+    psd_dB = 10*np.log10(psd_raw+eps)
     
     ### Smooth the PSD
     lpf = np.array([1, 2, 10, 2, 1]) 
@@ -117,7 +117,7 @@ def obt_psd_at_freqs(psd_raw, f, fvec):
     psd_dB = np.concatenate([psd_dB[:2], psd_dB_part, psd_dB[-2:]])
     
     fit_psd = interp1d(f, psd_dB)
-    return 10**(fit_psd(fvec)/20)
+    return 10**(fit_psd(fvec)/10)
 
 
 def get_psd(input_signal, freqs, fs, psd_params={}):
@@ -166,6 +166,7 @@ def get_psd(input_signal, freqs, fs, psd_params={}):
     f_sub = f[low_idx:(high_idx+1)]
     Pxx_sub = Pxx[:, low_idx:(high_idx+1)]
     
+    # to abs mag (output of  welch is squared mag)
     Pxx_target = np.array([obt_psd_at_freqs(Pxx_sub[roi_ix], f_sub, freqs) 
                            for roi_ix in range(input_signal.shape[0])]);
-    return Pxx_target
+    return np.sqrt(Pxx_target)
