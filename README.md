@@ -28,10 +28,13 @@ To run it, it is suggested to use docker with image `huaqingjin/sgm:mne_lib_fc`.
 
 If you find the image too complex, ensure your Python environment includes the following packages:
 
-- sbi
+- **sbi==0.18.0**
 - mne
 - torch
 - easydict
+- seaborn
+- mne_connectivity
+- jin_utils
 
 Additionally, it should also include other standard packages found in Anaconda.
 

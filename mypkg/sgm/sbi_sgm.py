@@ -269,12 +269,15 @@ class SBI_SGM():
         curX = np.concatenate([curX_psd, curX_fc])
         self.curX = torch.tensor(curX)
         
-        self.emp_rawfc = fc
-        stdfc, _ = self.get_stdfc(fc)
-        self.emp_fc = stdfc
+        if not self.params.fit_target.startswith("psd"):
+            self.emp_rawfc = fc
+            stdfc, _ = self.get_stdfc(fc)
+            self.emp_fc = stdfc
         
-        self.emp_rawpsd = psd
-        self.emp_psd = psd_2tr(psd)
+        if not self.params.fit_target.startswith("fc"):
+            self.emp_rawpsd = psd
+            self.emp_psd = psd_2tr(psd)
+
         self.post_sps = None
         
         
